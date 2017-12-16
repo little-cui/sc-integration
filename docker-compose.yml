@@ -1,0 +1,45 @@
+version: '3'
+services:
+  prometheus:
+    depends_on:
+      - service-center
+    image: 'prom/prometheus:latest'
+    # restart: always
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    depends_on:
+      - prometheus
+    image: 'grafana/grafana:latest'
+    # restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  etcd:
+    image: 'quay.io/coreos/etcd:latest'
+    # restart: always
+    ports:
+      - "2379:2379"
+    environment:
+      ETCD_ADVERTISE_CLIENT_URLS: http://etcd:2379
+      ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+      ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd:2380
+      ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+      ETCD_INITIAL_CLUSTER: default=http://etcd:2380
+
+  service-center:
+    depends_on:
+      - etcd
+    image: 'servicecomb/service-center:latest'
+    # restart: always
+    ports:
+      - "30100:30100"
+    environment:
+      BACKEND_ADDRESS: etcd:2379
+volumes:
+  grafana_data:
