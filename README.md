@@ -21,4 +21,4 @@ wget https://github.com/ServiceComb/service-center/blob/master/integration/healt
 
 Import the ServiceCenter dashboard template in Grafana.
 
-![](homepage.png)
+![](/home.png)
