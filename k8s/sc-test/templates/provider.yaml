@@ -1,0 +1,45 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "sc-test.fullname" . }}-provider
+  labels:
+    app: {{ template "sc-test.name" . }}-provider
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.provider.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "sc-test.name" . }}-provider
+        release: {{ .Release.Name }}
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: {{ .Chart.Name }}-provider
+          image: "{{ .Values.provider.image.repository }}:{{ .Values.provider.image.tag }}"
+          imagePullPolicy: {{ .Values.provider.image.pullPolicy }}
+          env:
+          - name: TYPE
+            value: provider
+          - name: PORT
+            value: "{{ .Values.provider.service.internalPort }}"
+          - name: REGISTRY
+            value: {{ .Values.registry.address }}
+          - name: APP
+            value: {{ .Release.Name }}
+          ports:
+            - containerPort: {{ .Values.provider.service.internalPort }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.provider.service.internalPort }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.provider.service.internalPort }}
+          resources:
+{{ toYaml .Values.provider.resources | indent 12 }}
+    {{- if .Values.provider.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.provider.nodeSelector | indent 8 }}
+    {{- end }}

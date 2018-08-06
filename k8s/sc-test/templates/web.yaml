@@ -1,0 +1,45 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "sc-test.fullname" . }}-web
+  labels:
+    app: {{ template "sc-test.name" . }}-web
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.web.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "sc-test.name" . }}-web
+        release: {{ .Release.Name }}
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: {{ .Chart.Name }}-web
+          image: "{{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}"
+          imagePullPolicy: {{ .Values.web.image.pullPolicy }}
+          env:
+          - name: TYPE
+            value: web
+          - name: PORT
+            value: "{{ .Values.web.service.internalPort }}"
+          - name: REGISTRY
+            value: {{ .Values.registry.address }}
+          - name: APP
+            value: {{ .Release.Name }}
+          ports:
+            - containerPort: {{ .Values.web.service.internalPort }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.web.service.internalPort }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.web.service.internalPort }}
+          resources:
+{{ toYaml .Values.web.resources | indent 12 }}
+    {{- if .Values.web.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.web.nodeSelector | indent 8 }}
+    {{- end }}

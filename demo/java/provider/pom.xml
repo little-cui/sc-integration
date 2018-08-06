@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<project
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+        xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.service</groupId>
+    <artifactId>provider</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>provider</name>
+    <url>http://maven.apache.org</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <cse.version>2.3.25</cse.version>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <demo.main>com.service.provider.ProviderApplication</demo.main>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.huawei.paas.cse</groupId>
+                <artifactId>cse-dependency</artifactId>
+                <version>${cse.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.huawei.paas.cse</groupId>
+            <artifactId>cse-solution-service-engine</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>com.service.provider.ProviderApplication</mainClass>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.26.0</version>
+                <executions>
+                    <execution>
+                        <id>docker-build</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <!--全局配置-->
+                <configuration>
+                    <!--这一部分是为了实现对远程docker容器的控制-->
+                    <!--docker主机地址,用于完成docker各项功能,注意是tcp不是http!-->
+                    <!--<dockerHost>tcp://公网IP:2376</dockerHost>-->
+                    <!--docker远程访问所需证书地址,如果docker远程主机没有启用TLS验证则不需要配证书-->
+                    <!--<certPath>${project.basedir}/docker/ssh</certPath>-->
+
+                    <!--这一部分是为了实现docker镜像的构建和推送-->
+                    <!--registry地址,用于推送,拉取镜像,我这里用的是阿里的registry-->
+                    <!--<registry>desktop-0028:5000</registry>-->
+                    <!--认证配置,用于私有registry认证,如果忘记了可以去阿里的registry查看-->
+                    <!--<authConfig>-->
+                        <!--<push>-->
+                            <!--<username>这里填registry的用户名</username>-->
+                            <!--<password>这里填registry的密码</password>-->
+                        <!--</push>-->
+                    <!--</authConfig>-->
+                    <!--镜像相关配置,支持多镜像-->
+                    <images>
+                        <!-- 单个镜像配置 -->
+                        <image>
+                            <!--镜像名(含版本号)-->
+                            <name>desktop-0028:5000/servicecomb/sc-provider:latest</name>
+                            <!--别名:用于容器命名和在docker-compose.yml文件只能找到对应名字的配置-->
+                            <alias>${project.name}</alias>
+                            <!--镜像build相关配置-->
+                            <build>
+                                <!--使用dockerFile文件-->
+                                <dockerFileDir>${project.basedir}</dockerFileDir>
+                            </build>
+                            <!--配置docker-compose文件-->
+                            <!--<external>-->
+                                <!--<type>compose</type>-->
+                                <!--<basedir>${project.basedir}/docker</basedir>-->
+                                <!--<composeFile>docker-compose.yml</composeFile>-->
+                            <!--</external>-->
+                            <!--容器run相关配置-->
+                            <run>
+                                <!--配置运行时容器命名策略为:别名,如果不指定则默认为none,即使用随机分配名称-->
+                                <namingStrategy>alias</namingStrategy>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

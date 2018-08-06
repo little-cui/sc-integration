@@ -1,0 +1,45 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "sc-test.fullname" . }}-consumer
+  labels:
+    app: {{ template "sc-test.name" . }}-consumer
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.consumer.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "sc-test.name" . }}-consumer
+        release: {{ .Release.Name }}
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: {{ .Chart.Name }}-consumer
+          image: "{{ .Values.consumer.image.repository }}:{{ .Values.consumer.image.tag }}"
+          imagePullPolicy: {{ .Values.consumer.image.pullPolicy }}
+          env:
+          - name: TYPE
+            value: consumer
+          - name: PORT
+            value: "{{ .Values.consumer.service.internalPort }}"
+          - name: REGISTRY
+            value: {{ .Values.registry.address }}
+          - name: APP
+            value: {{ .Release.Name }}
+          ports:
+            - containerPort: {{ .Values.consumer.service.internalPort }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.consumer.service.internalPort }}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.consumer.service.internalPort }}
+          resources:
+{{ toYaml .Values.consumer.resources | indent 12 }}
+    {{- if .Values.consumer.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.consumer.nodeSelector | indent 8 }}
+    {{- end }}

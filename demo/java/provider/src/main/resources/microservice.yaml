@@ -1,0 +1,14 @@
+APPLICATION_ID: default
+service_description:
+  name: provider
+  version: 0.0.1
+  properties:
+    allowCrossApp: false
+cse:
+  service:
+    registry:
+      address: http://127.0.0.1:30100
+      instance:
+        watch: true
+  rest:
+    address: 0.0.0.0:8080
