@@ -22,7 +22,6 @@ helm install --name servicecomb \
  --set frontend.image.repository=desktop-0028:5000/servicecomb/scfrontend \
  --set sc.image.pullPolicy=Always \
  --set frontend.image.pullPolicy=Always \
- --set sc.service.type=NodePort \
  service-center/
 
 helm install --name test \
@@ -43,7 +42,6 @@ helm upgrade \
  --set frontend.image.repository=desktop-0028:5000/servicecomb/scfrontend \
  --set sc.image.pullPolicy=Always \
  --set frontend.image.pullPolicy=Always \
- --set sc.service.type=NodePort \
  servicecomb service-center/
  
 helm upgrade \
