@@ -54,3 +54,10 @@ helm upgrade \
  test sc-test/
 ```
 
+## clean up
+
+```bash
+helm delete --purge servicecomb
+
+helm delete --purge test
+```
